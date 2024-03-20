@@ -1,0 +1,495 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ''
+Resources:
+
+  #----------------------------------------- network -------------------------------
+
+  EC2VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: '11.0.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: 'default'
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-main-dev'
+
+  EC2Subnet:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !GetAtt EC2Subnet2.AvailabilityZone
+      CidrBlock: '11.0.13.0/24'
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'kubernetes.io/cluster/utility-cluster-eks-cluster-dev'
+          Value: 'owned'
+        - Key: 'kubernetes.io/role/elb'
+          Value: '1'
+        - Key: 'Name'
+          Value: !Sub 'public-${EC2Subnet2.AvailabilityZone}'
+
+  EC2Subnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Sub 'us-east-1b'
+      CidrBlock: '11.0.11.0/24'
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: 'kubernetes.io/cluster/utility-cluster-eks-cluster-dev'
+          Value: 'owned'
+        - Key: 'kubernetes.io/role/internal-elb'
+          Value: '1'
+        - Key: 'Name'
+          Value: !Sub 'private-us-east-1b'
+
+  EC2Subnet3:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !GetAtt EC2Subnet4.AvailabilityZone
+      CidrBlock: '11.0.12.0/24'
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: 'kubernetes.io/cluster/utility-cluster-eks-cluster-dev'
+          Value: 'owned'
+        - Key: 'kubernetes.io/role/elb'
+          Value: '1'
+        - Key: 'Name'
+          Value: !Sub 'public-${EC2Subnet4.AvailabilityZone}'
+
+  EC2Subnet4:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone: !Sub 'us-east-1a'
+      CidrBlock: '11.0.10.0/24'
+      VpcId: !Ref EC2VPC
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: 'kubernetes.io/cluster/utility-cluster-eks-cluster-dev'
+          Value: 'owned'
+        - Key: 'kubernetes.io/role/internal-elb'
+          Value: '1'
+        - Key: 'Name'
+          Value: !Sub 'private-us-east-1a'
+
+  EC2InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-igw-dev'
+
+  EC2VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref EC2VPC
+      InternetGatewayId: !Ref EC2InternetGateway
+
+  EC2EIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: 'vpc'
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-nat-a-eip-dev'
+
+  EC2EIP2:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: 'vpc'
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-nat-b-eip-dev'
+
+  EC2NatGateway:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      SubnetId: !Ref EC2Subnet3
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-nat-a-dev'
+      AllocationId: !GetAtt EC2EIP.AllocationId
+
+  EC2NatGateway2:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      SubnetId: !Ref EC2Subnet
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-nat-b-dev'
+      AllocationId: !GetAtt EC2EIP2.AllocationId
+
+  EC2RouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref EC2VPC
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-public-rt-dev'
+  
+  EC2SubnetRouteTableAssociation1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref EC2Subnet
+      RouteTableId: !Ref EC2RouteTable2
+  
+  EC2SubnetRouteTableAssociation2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref EC2Subnet3
+      RouteTableId: !Ref EC2RouteTable2
+
+  EC2RouteTable4:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref EC2VPC
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-private-rt-a-dev'
+
+  EC2SubnetRouteTableAssociation3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref EC2Subnet4
+      RouteTableId: !Ref EC2RouteTable4
+
+  EC2RouteTable5:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref EC2VPC
+      Tags:
+        - Key: 'Name'
+          Value: 'utility-cluster-private-rt-b-dev'
+
+  EC2SubnetRouteTableAssociation4:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref EC2Subnet2
+      RouteTableId: !Ref EC2RouteTable5
+
+  EC2Route:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref EC2InternetGateway
+      RouteTableId: !Ref EC2RouteTable2
+
+  EC2Route2:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref EC2NatGateway
+      RouteTableId: !Ref EC2RouteTable4
+
+  EC2Route3:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref EC2NatGateway2
+      RouteTableId: !Ref EC2RouteTable5
+
+  #----------------------------------------- eks cluster -------------------------------
+
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: 'utility-cluster-eks-rol-dev'
+      AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"eks.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonEKSClusterPolicy'
+
+  EKSCluster:
+    Type: 'AWS::EKS::Cluster'
+    Properties:
+      Name: 'utility-cluster-eks-cluster-dev'
+      RoleArn: !GetAtt IAMRole.Arn
+      Version: '1.23'
+      ResourcesVpcConfig:
+        SubnetIds:
+          - !Ref EC2Subnet2
+          - !Ref EC2Subnet3
+          - !Ref EC2Subnet
+          - !Ref EC2Subnet4
+      KubernetesNetworkConfig:
+        ServiceIpv4Cidr: '10.100.0.0/16'
+
+  IAMRole2:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: 'utility-cluster-eks-nodes-rol-dev'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'ec2.amazonaws.com'
+            Action: 'sts:AssumeRole'
+          - Effect: 'Allow'
+            Principal:
+              Federated: 'arn:aws:iam::438555236323:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${!Ref EKSCluster}'
+            Action: 'sts:AssumeRoleWithWebIdentity'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy'
+        - 'arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly'
+        - 'arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy'
+
+
+  EKSNodegroup:
+    Type: 'AWS::EKS::Nodegroup'
+    Properties:
+      NodegroupName: 'utility-cluster-private-nodes-dev'
+      ClusterName: !Ref EKSCluster
+      Version: '1.23'
+      ScalingConfig:
+        MinSize: 1
+        MaxSize: 10
+        DesiredSize: 4
+      InstanceTypes:
+        - 't3.medium'
+      Subnets:
+        - !Ref EC2Subnet2
+        - !Ref EC2Subnet4
+      NodeRole: !GetAtt IAMRole2.Arn
+      Labels:
+        role: 'general'
+      DiskSize: 20
+      Tags: {}
+      CapacityType: 'ON_DEMAND'
+
+    
+
+
+  # ----------------------------------------- node autoscaler -------------------------------
+
+  
+  
+  IAMManagedPolicy2:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: 'utility-cluster-autoscaler-pol-dev'
+      Path: '/'
+      PolicyDocument: '{"Statement":[{"Action":["autoscaling:DescribeAutoScalingGroups","autoscaling:DescribeAutoScalingInstances","autoscaling:DescribeLaunchConfigurations","autoscaling:DescribeTags","autoscaling:SetDesiredCapacity","autoscaling:TerminateInstanceInAutoScalingGroup","ec2:DescribeLaunchTemplateVersions"],"Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+
+  # ----------------------------------------- alb controller -------------------------------
+
+  IAMManagedPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: 'utility-cluster-inline-pol-tags-dev'
+      Path: '/'
+      PolicyDocument: '{"Statement":[{"Action":"elasticloadbalancing:AddTags","Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+
+  IAMManagedPolicy3:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: 'utility-cluster-alb-controller-pol-dev'
+      Path: '/'
+      PolicyDocument: '{"Statement":[{"Action":["iam:CreateServiceLinkedRole"],"Condition":{"StringEquals":{"iam:AWSServiceName":"elasticloadbalancing.amazonaws.com"}},"Effect":"Allow","Resource":"*"},{"Action":["ec2:DescribeAccountAttributes","ec2:DescribeAddresses","ec2:DescribeAvailabilityZones","ec2:DescribeInternetGateways","ec2:DescribeVpcs","ec2:DescribeVpcPeeringConnections","ec2:DescribeSubnets","ec2:DescribeSecurityGroups","ec2:DescribeInstances","ec2:DescribeNetworkInterfaces","ec2:DescribeTags","ec2:GetCoipPoolUsage","ec2:DescribeCoipPools","elasticloadbalancing:DescribeLoadBalancers","elasticloadbalancing:DescribeLoadBalancerAttributes","elasticloadbalancing:DescribeListeners","elasticloadbalancing:DescribeListenerCertificates","elasticloadbalancing:DescribeSSLPolicies","elasticloadbalancing:DescribeRules","elasticloadbalancing:DescribeTargetGroups","elasticloadbalancing:DescribeTargetGroupAttributes","elasticloadbalancing:DescribeTargetHealth","elasticloadbalancing:DescribeTags"],"Effect":"Allow","Resource":"*"},{"Action":["cognito-idp:DescribeUserPoolClient","acm:ListCertificates","acm:DescribeCertificate","iam:ListServerCertificates","iam:GetServerCertificate","waf-regional:GetWebACL","waf-regional:GetWebACLForResource","waf-regional:AssociateWebACL","waf-regional:DisassociateWebACL","wafv2:GetWebACL","wafv2:GetWebACLForResource","wafv2:AssociateWebACL","wafv2:DisassociateWebACL","shield:GetSubscriptionState","shield:DescribeProtection","shield:CreateProtection","shield:DeleteProtection"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:AuthorizeSecurityGroupIngress","ec2:RevokeSecurityGroupIngress"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:CreateSecurityGroup"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:CreateTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"false"},"StringEquals":{"ec2:CreateAction":"CreateSecurityGroup"}},"Effect":"Allow","Resource":"arn:aws:ec2:*:*:security-group/*"},{"Action":["ec2:CreateTags","ec2:DeleteTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"true","aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"arn:aws:ec2:*:*:security-group/*"},{"Action":["ec2:AuthorizeSecurityGroupIngress","ec2:RevokeSecurityGroupIngress","ec2:DeleteSecurityGroup"],"Condition":{"Null":{"aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:CreateLoadBalancer","elasticloadbalancing:CreateTargetGroup"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:CreateListener","elasticloadbalancing:DeleteListener","elasticloadbalancing:CreateRule","elasticloadbalancing:DeleteRule"],"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:AddTags","elasticloadbalancing:RemoveTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"true","aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":["arn:aws:elasticloadbalancing:*:*:targetgroup/*/*","arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*","arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"]},{"Action":["elasticloadbalancing:AddTags","elasticloadbalancing:RemoveTags"],"Effect":"Allow","Resource":["arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*","arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*","arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*","arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"]},{"Action":["elasticloadbalancing:ModifyLoadBalancerAttributes","elasticloadbalancing:SetIpAddressType","elasticloadbalancing:SetSecurityGroups","elasticloadbalancing:SetSubnets","elasticloadbalancing:DeleteLoadBalancer","elasticloadbalancing:ModifyTargetGroup","elasticloadbalancing:ModifyTargetGroupAttributes","elasticloadbalancing:DeleteTargetGroup"],"Condition":{"Null":{"aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:RegisterTargets","elasticloadbalancing:DeregisterTargets"],"Effect":"Allow","Resource":"arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"},{"Action":["elasticloadbalancing:SetWebAcl","elasticloadbalancing:ModifyListener","elasticloadbalancing:AddListenerCertificates","elasticloadbalancing:RemoveListenerCertificates","elasticloadbalancing:ModifyRule"],"Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+
+  IAMRole5:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: 'utility-cluster-alb-controller-rol-dev'
+      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
+"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:default:utility-cluster-alb-controller-sa-dev"}}}]}'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicy3
+        - !Ref IAMManagedPolicy
+
+  # ----------------------------------------- external dns -------------------------------
+
+  IAMManagedPolicy4:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: 'utility-cluster-ext-dns-pol-dev'
+      Path: '/'
+      PolicyDocument: '{"Statement":[{"Action":["route53:ChangeResourceRecordSets"],"Effect":"Allow","Resource":["arn:aws:route53:::hostedzone/*"]},{"Action":["route53:ListHostedZones","route53:ListResourceRecordSets"],"Effect":"Allow","Resource":["*"]}],"Version":"2012-10-17"}'
+
+  IAMRole6:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: 'utility-cluster-external-dns-rol-dev'
+      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
+"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:default:external-dns"}}}]}'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicy4
+
+  # ----------------------------------------- efs csi driver -------------------------------
+
+  IAMManagedPolicy5:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      ManagedPolicyName: 'utility-cluster-eks-csi-pol-dev'
+      Path: '/'
+      PolicyDocument: '{"Statement":[{"Action":["elasticfilesystem:DescribeAccessPoints","elasticfilesystem:DescribeFileSystems","elasticfilesystem:DescribeMountTargets","ec2:DescribeAvailabilityZones"],"Effect":"Allow","Resource":"*"},{"Action":["elasticfilesystem:CreateAccessPoint"],"Condition":{"StringLike":{"aws:RequestTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticfilesystem:TagResource"],"Condition":{"StringLike":{"aws:ResourceTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"},{"Action":"elasticfilesystem:DeleteAccessPoint","Condition":{"StringEquals":{"aws:ResourceTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+
+  EC2SecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'Managed by Terraform'
+      GroupName: 'utility-cluster-rds-sg-dev'
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - SourceSecurityGroupId: !Ref EC2SecurityGroup2
+          SourceSecurityGroupOwnerId: !Ref AWS::AccountId
+          FromPort: 5432
+          IpProtocol: 'tcp'
+          ToPort: 5432
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+
+  EC2SecurityGroup2:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'EKS created security group applied to ENI that is attached to EKS Control Plane master nodes, as well as any managed workloads.'
+      GroupName: 'eks-cluster-sg-utility-cluster-eks-cluster-dev-786871630'
+      Tags:
+        - Key: 'kubernetes.io/cluster/utility-cluster-eks-cluster-dev'
+          Value: 'owned'
+        - Key: 'Name'
+          Value: 'eks-cluster-sg-utility-cluster-eks-cluster-dev-786871630'
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+
+  EC2SecurityGroup3:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'EFS Security Group'
+      GroupName: 'utility-cluster-efs-sg-dev'
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - CidrIp: !GetAtt EC2VPC.CidrBlock
+          FromPort: 2049
+          IpProtocol: 'tcp'
+          ToPort: 2049
+
+  EC2SecurityGroup4:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: '[k8s] Shared Backend SecurityGroup for LoadBalancer'
+      GroupName: 'k8s-traffic-demo-2a97516c35'
+      Tags:
+        - Key: 'elbv2.k8s.aws/cluster'
+          Value: 'demo'
+        - Key: 'elbv2.k8s.aws/resource'
+          Value: 'backend-sg'
+      VpcId: 'vpc-035c1eb9a9888156e'
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+
+  RDSDBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: 'utility cluster subnet group'
+      DBSubnetGroupName: 'utility-cluster-subnet-gr-dev'
+      SubnetIds:
+        - !Ref EC2Subnet2
+        - !Ref EC2Subnet4
+
+  RDSDBInstance:
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      DBInstanceIdentifier: 'sonardb1'
+      AllocatedStorage: 20
+      DBInstanceClass: 'db.t3.micro'
+      Engine: 'postgres'
+      MasterUsername: 'adminsonar'
+      MasterUserPassword: 'REPLACEME'
+      DBName: 'sonardb'
+      PreferredBackupWindow: '21:00-23:00'
+      BackupRetentionPeriod: 30
+      AvailabilityZone: !GetAtt EC2Subnet3.AvailabilityZone
+      PreferredMaintenanceWindow: 'sun:00:00-sun:03:00'
+      MultiAZ: false
+      EngineVersion: '14.6'
+      AutoMinorVersionUpgrade: true
+      LicenseModel: 'postgresql-license'
+      PubliclyAccessible: false
+      StorageType: 'gp2'
+      Port: 5432
+      CopyTagsToSnapshot: false
+      MonitoringInterval: 0
+      EnableIAMDatabaseAuthentication: false
+      EnablePerformanceInsights: false
+      DeletionProtection: false
+      DBSubnetGroupName: 'utility-cluster-subnet-gr-dev'
+      VPCSecurityGroups:
+        - !Ref EC2SecurityGroup
+      DBParameterGroupName: 'default.postgres14'
+      OptionGroupName: 'default:postgres-14'
+      CACertificateIdentifier: 'rds-ca-rsa2048-g1'
+
+  IAMRole4:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: '/'
+      RoleName: 'utility-cluster-eks-csi-rol-dev'
+      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
+"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:kube-system:utility-cluster-eks-csi-sa-dev"}}}]}'
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - !Ref IAMManagedPolicy5
+
+  EFSFileSystem:
+    Type: 'AWS::EFS::FileSystem'
+    Properties:
+      PerformanceMode: 'generalPurpose'
+      Encrypted: false
+      ThroughputMode: 'bursting'
+      FileSystemTags:
+        - Key: 'Name'
+          Value: 'efs_vol'
+
+  EFSMountTarget:
+    Type: 'AWS::EFS::MountTarget'
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      IpAddress: '11.0.11.69'
+      SecurityGroups:
+        - !Ref EC2SecurityGroup3
+      SubnetId: !Ref EC2Subnet2
+
+  EFSMountTarget2:
+    Type: 'AWS::EFS::MountTarget'
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      IpAddress: '11.0.10.62'
+      SecurityGroups:
+        - !Ref EC2SecurityGroup3
+      SubnetId: !Ref EC2Subnet4
+
+  EFSAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref EFSFileSystem
+      ClientToken: 'pvc-d2bfc7a1-266c-4a85-8e1d-fba7f734a2e2'
+      AccessPointTags:
+        - Key: 'efs.csi.aws.com/cluster'
+          Value: 'true'
+      PosixUser:
+        Uid: 1000
+        Gid: 1000
+      RootDirectory:
+        Path: '/var/jenkins_home/pvc-d2bfc7a1-266c-4a85-8e1d-fba7f734a2e2'
+        CreationInfo:
+          OwnerUid: 1000
+          OwnerGid: 1000
+          Permissions: '700'
