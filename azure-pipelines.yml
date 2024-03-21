@@ -59,7 +59,7 @@ steps:
   - task: HelmInstaller@1
     displayName: 'Install Helm'
     inputs:
-      helmVersionToInstall: ${{ parameters.helmVersion }}
+      helmVersionToInstall: '3.0.0'
 
   - task: AWSShellScript@1
     displayName: 'Pull and deploy Helm Chart'
