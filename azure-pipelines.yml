@@ -74,7 +74,10 @@ steps:
         pwd
         cd terraform
         terraform init
-        terraform apply -auto-approve -lock=false
+        export TF_VAR_environment=$(ENVIRONMENT)
+        export TF_VAR_project_name=$(PROJECT)
+        export TF_VAR_cloudflare_email=$(CLOUDFLAREEMAIL)
+        terraform apply -auto-approve -lock=false -var="cloudflare_api_key=$(CLOUDFLAREKEY)"
 
 
 
