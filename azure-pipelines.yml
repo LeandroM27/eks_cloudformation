@@ -74,6 +74,7 @@ steps:
         aws eks update-kubeconfig --region $(REGION) --name $(PROJECT)-eks-cluster-$(ENVIRONMENT)
                 
         # Deploy Helm Chart
+        helm repo update
         echo 'Deploy Helm chart to EKS...'
         helm install prueba-eks-alb-controller-dev https://aws.github.io/eks-charts/aws-load-balancer-controller \
         --namespace default \
