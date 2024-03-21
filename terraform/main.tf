@@ -16,6 +16,15 @@ terraform {
     
   }
 
+  backend "s3" {
+    bucket = "agricola-tf-state"
+    key    = "tf/state/terraform.tfstate"
+    region = "us-east-1"
+    dynamodb_table = "agricola-tf-state"
+    encrypt = "true"
+  }
+
+
 }
 
 data "aws_eks_cluster" "eks-cluster" {
