@@ -36,7 +36,7 @@
 # this is added for a test
 
 data "aws_vpc" "main" {
-  id = "prueba-eks-main-dev"
+  id = "vpc-072748e68eff925dc"
 }
 
 resource "aws_security_group" "alb-sg" {
