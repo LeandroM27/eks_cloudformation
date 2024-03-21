@@ -4,28 +4,28 @@ trigger:
 parameters:
   - name: Project
     type: string
-    Default: $(Project)
+    default: $(Project)
   - name: Environment
     type: string
-    Default: $(Environment)
+    default: $(Environment)
   - name: MasterUserPassword
     type: string
-    Default: $(MasterUserPassword)
+    default: $(MasterUserPassword)
   - name: VPCBlock
     type: string
-    Default: $(VPCBlock) 
+    default: $(VPCBlock) 
   - name: VPCBlockSub1
     type: string
-    Default: $(VPCBlockSub1) 
+    default: $(VPCBlockSub1) 
   - name: VPCBlockSub2
     type: string
-    Default: $(VPCBlockSub2) 
+    default: $(VPCBlockSub2) 
   - name: VPCBlockSub3
     type: string
-    Default: $(VPCBlockSub3)
+    default: $(VPCBlockSub3)
   - name: VPCBlockSub4
     type: string
-    Default: $(VPCBlockSub4)
+    default: $(VPCBlockSub4)
 
 pool:
   vmImage: ubuntu-latest
@@ -45,12 +45,12 @@ steps:
     templateSource: 'file'
     templateFile: '$(Build.Repository.LocalPath)/main.yml'
     parameters: 
-      Project: $(Project) 
-      Environment: $(Environment) 
-      MasterUserPassword: $(MasterUserPassword)
-      VPCBlock: $(VPCBlock) 
-      VPCBlockSub1: $(VPCBlockSub1) 
-      VPCBlockSub2: $(VPCBlockSub2) 
-      VPCBlockSub3: $(VPCBlockSub3)
-      VPCBlockSub4: $(VPCBlockSub4)
+      Project: $(parameters.Project) 
+      Environment: $(parameters.Environment) 
+      MasterUserPassword: $(parameters.MasterUserPassword)
+      VPCBlock: $(parameters.VPCBlock) 
+      VPCBlockSub1: $(parameters.VPCBlockSub1) 
+      VPCBlockSub2: $(parameters.VPCBlockSub2) 
+      VPCBlockSub3: $(parameters.VPCBlockSub3)
+      VPCBlockSub4: $(parameters.VPCBlockSub4)
       
