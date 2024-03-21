@@ -1,32 +1,6 @@
 trigger:
   - main
 
-parameters:
-  - name: Project
-    type: string
-    default: $(Project)
-  - name: Environment
-    type: string
-    default: $(Environment)
-  - name: MasterUserPassword
-    type: string
-    default: $(MasterUserPassword)
-  - name: VPCBlock
-    type: string
-    default: $(VPCBlock) 
-  - name: VPCBlockSub1
-    type: string
-    default: $(VPCBlockSub1) 
-  - name: VPCBlockSub2
-    type: string
-    default: $(VPCBlockSub2) 
-  - name: VPCBlockSub3
-    type: string
-    default: $(VPCBlockSub3)
-  - name: VPCBlockSub4
-    type: string
-    default: $(VPCBlockSub4)
-
 pool:
   vmImage: ubuntu-latest
 
@@ -43,13 +17,40 @@ steps:
       stackName: 'dev'
       templateSource: 'file'
       templateFile: '$(Build.Repository.LocalPath)/main.yml'
-      parameters: 
-        Project: ${{parameters.Project}} 
-        Environment: ${{parameters.Environment}} 
-        MasterUserPassword: ${{parameters.MasterUserPassword}}
-        VPCBlock: ${{parameters.VPCBlock}} 
-        VPCBlockSub1: ${{parameters.VPCBlockSub1}} 
-        VPCBlockSub2: ${{parameters.VPCBlockSub2}} 
-        VPCBlockSub3: ${{parameters.VPCBlockSub3}}
-        VPCBlockSub4: ${{parameters.VPCBlockSub4}}
+      templateParametersSource: 'inline'
+      templateParameters: |
+        [
+          {
+            "ParameterKey":"Project",
+            "ParameterValue":"$(Project)"
+          },
+          {
+            "ParameterKey":"Environment",
+            "ParameterValue":"$(Environment)"
+          },
+          {
+            "ParameterKey":"MasterUserPassword",
+            "ParameterValue":"$(MasterUserPassword)"
+          },
+          {
+            "ParameterKey":"VPCBlock",
+            "ParameterValue":"$(VPCBlock)"
+          },
+          {
+            "ParameterKey":"VPCBlockSub1",
+            "ParameterValue":"$(VPCBlockSub1)"
+          },
+          {
+            "ParameterKey":"VPCBlockSub2",
+            "ParameterValue":"$(VPCBlockSub2)"
+          },
+          {
+            "ParameterKey":"VPCBlockSub3",
+            "ParameterValue":"$(VPCBlockSub3)"
+          },
+          {
+            "ParameterKey":"VPCBlockSub4",
+            "ParameterValue":"$(VPCBlockSub4)"
+          }
+        ]
 
