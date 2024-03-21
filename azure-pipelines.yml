@@ -73,6 +73,7 @@ steps:
         echo 'deploying helm charts'
         pwd
         cd terraform
+        terraform init
         terraform apply
 
 
