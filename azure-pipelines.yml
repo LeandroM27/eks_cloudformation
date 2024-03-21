@@ -1,5 +1,5 @@
 trigger:
-- main
+  - main
 
 parameters:
   - name: Project
@@ -35,22 +35,21 @@ variables:
   region: 'us-east-1'
 
 steps:
-- checkout: self  
-
-- task: CloudFormationCreateOrUpdateStack@1
-  inputs:
-    awsCredentials: $(credentials)
-    regionName: $(region)
-    stackName: 'dev'
-    templateSource: 'file'
-    templateFile: '$(Build.Repository.LocalPath)/main.yml'
-    parameters: 
-      Project: ${{parameters.Project}} 
-      Environment: ${{parameters.Environment}} 
-      MasterUserPassword: ${{parameters.MasterUserPassword}}
-      VPCBlock: ${{parameters.VPCBlock}} 
-      VPCBlockSub1: ${{parameters.VPCBlockSub1}} 
-      VPCBlockSub2: ${{parameters.VPCBlockSub2}} 
-      VPCBlockSub3: ${{parameters.VPCBlockSub3}}
-      VPCBlockSub4: ${{parameters.VPCBlockSub4}}
+  - checkout: self  
+  - task: CloudFormationCreateOrUpdateStack@1
+    inputs:
+      awsCredentials: $(credentials)
+      regionName: $(region)
+      stackName: 'dev'
+      templateSource: 'file'
+      templateFile: '$(Build.Repository.LocalPath)/main.yml'
+      parameters: 
+        Project: ${{parameters.Project}} 
+        Environment: ${{parameters.Environment}} 
+        MasterUserPassword: ${{parameters.MasterUserPassword}}
+        VPCBlock: ${{parameters.VPCBlock}} 
+        VPCBlockSub1: ${{parameters.VPCBlockSub1}} 
+        VPCBlockSub2: ${{parameters.VPCBlockSub2}} 
+        VPCBlockSub3: ${{parameters.VPCBlockSub3}}
+        VPCBlockSub4: ${{parameters.VPCBlockSub4}}
 
