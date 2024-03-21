@@ -47,7 +47,6 @@ provider "helm" {
 
 data "aws_eks_cluster_auth" "cluster_kube_config" {
   name = data.aws_eks_cluster.eks-cluster.id // this one needs to change for multi env since it uses cluster as ref
-  depends_on = [data.aws_eks_cluster.eks-cluster]
 }
 
 provider "kubernetes" {
