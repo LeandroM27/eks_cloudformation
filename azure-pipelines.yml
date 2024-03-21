@@ -4,20 +4,28 @@ trigger:
 parameters:
   - name: Project
     type: string
+    Default: $(Project)
   - name: Environment
     type: string
+    Default: $(Environment)
   - name: MasterUserPassword
     type: string
+    Default: $(MasterUserPassword)
   - name: VPCBlock
     type: string
+    Default: $(VPCBlock) 
   - name: VPCBlockSub1
     type: string
+    Default: $(VPCBlockSub1) 
   - name: VPCBlockSub2
     type: string
+    Default: $(VPCBlockSub2) 
   - name: VPCBlockSub3
     type: string
+    Default: $(VPCBlockSub3)
   - name: VPCBlockSub4
     type: string
+    Default: $(VPCBlockSub4)
 
 pool:
   vmImage: ubuntu-latest
