@@ -1,19 +1,29 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+- master
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  credentials: 'aws-azure'
+  region: 'us-east-1'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+steps:
+- checkout: self  
+
+- task: CloudFormationCreateOrUpdateStack@1
+  inputs:
+    awsCredentials: $(credentials)
+    regionName: $(region)
+    stackName: 'dev'
+    templateSource: 'file'
+    templateFile: '$(Build.Repository.LocalPath)/main.yml'
+    templateParameters: >
+      -Project $(Project)
+      -Environment $(Environment)
+      -MasterUserPassword $(MasterUserPassword)
+      -VPCBlock $(VPCBlock)
+      -VPCBlockSub1 $(VPCBlockSub1)
+      -VPCBlockSub2 $(VPCBlockSub2)
+      -VPCBlockSub3 $(VPCBlockSub3)
+      -VPCBlockSub4 $(VPCBlockSub4)
