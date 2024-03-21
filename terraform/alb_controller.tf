@@ -40,7 +40,7 @@ data "aws_vpc" "main" {
 }
 
 resource "aws_security_group" "alb-sg" {
-  name   = "${var.name}-alb-sg-${var.environment}"
+  name   = "alb-sg"
   vpc_id = data.aws_vpc.main.id
 
   ingress {
@@ -63,9 +63,5 @@ resource "aws_security_group" "alb-sg" {
     to_port          = 0
     cidr_blocks      = ["0.0.0.0/0"]
     
-  }
-
-  tags = {
-    Environment = var.environment
   }
 }
