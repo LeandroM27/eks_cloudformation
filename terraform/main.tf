@@ -43,14 +43,14 @@ provider "helm" {
   }
 }
 
-## creates a file with what is needed to use kubernetes in our cluster
+# creates a file with what is needed to use kubernetes in our cluster
 
-# data "aws_eks_cluster_auth" "cluster_kube_config" {
-#   name = data.aws_eks_cluster.eks-cluster.id // this one needs to change for multi env since it uses cluster as ref
-# }
+data "aws_eks_cluster_auth" "cluster_kube_config" {
+  name = data.aws_eks_cluster.eks-cluster.id // this one needs to change for multi env since it uses cluster as ref
+}
 
-# provider "kubernetes" {
-#   host                   = data.aws_eks_cluster.eks-cluster.endpoint
-#   token                  = data.aws_eks_cluster_auth.cluster_kube_config.token
-#   cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
-# }
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  token                  = data.aws_eks_cluster_auth.cluster_kube_config.token
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+}
