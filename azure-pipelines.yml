@@ -1,6 +1,24 @@
 trigger:
 - main
 
+parameters:
+  - name: Project
+    type: string
+  - name: Environment
+    type: string
+  - name: MasterUserPassword
+    type: string
+  - name: VPCBlock
+    type: string
+  - name: VPCBlockSub1
+    type: string
+  - name: VPCBlockSub2
+    type: string
+  - name: VPCBlockSub3
+    type: string
+  - name: VPCBlockSub4
+    type: string
+
 pool:
   vmImage: ubuntu-latest
 
