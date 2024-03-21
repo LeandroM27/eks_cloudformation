@@ -57,7 +57,7 @@ steps:
         ]
 
   - task: HelmInstaller@1
-    displayName: 'Install Helm'
+      displayName: 'Install Helm'
       inputs:
         helmVersionToInstall: ${{ parameters.helmVersion }}
 
@@ -70,7 +70,7 @@ steps:
         scriptType: 'inline'
         inlineScript: |
 
-        
+
           # Get Kubeconfig
           echo 'Connect to Amazon EKS cluster'
           aws eks update-kubeconfig --region $(REGION) --name $(PROJECT)-eks-cluster-$(ENVIRONMENT)
