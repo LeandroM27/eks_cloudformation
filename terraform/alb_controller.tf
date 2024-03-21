@@ -35,9 +35,13 @@
 
 # this is added for a test
 
+data "aws_vpc" "main" {
+  id = "prueba-eks-main-dev"
+}
+
 resource "aws_security_group" "alb-sg" {
   name   = "${var.name}-alb-sg-${var.environment}"
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.main.id
 
   ingress {
     protocol         = "tcp"
