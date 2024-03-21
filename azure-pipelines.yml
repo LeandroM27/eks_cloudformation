@@ -63,7 +63,7 @@ steps:
       provider: 'aws'
       command: 'init'
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-      backendServiceAWS: $(credentials)
+      backendServiceAWS: 'aws-terraform'
       backendAWSBucketName: 'agricola-tf-state'
       backendAWSKey: 'tf/state/terraform.tfstate'
   - task: TerraformTaskV4@4
@@ -71,5 +71,5 @@ steps:
       provider: 'aws'
       command: 'apply'
       workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-      environmentServiceNameAWS: $(credentials)
+      environmentServiceNameAWS: 'aws-terraform'
 
