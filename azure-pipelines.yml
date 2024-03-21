@@ -57,33 +57,33 @@ steps:
         ]
 
   - task: HelmInstaller@1
-        displayName: 'Install Helm'
-        inputs:
-          helmVersionToInstall: ${{ parameters.helmVersion }}
+    displayName: 'Install Helm'
+      inputs:
+        helmVersionToInstall: ${{ parameters.helmVersion }}
 
   - task: AWSShellScript@1
-        displayName: 'Pull and deploy Helm Chart'
-        inputs:
-            awsCredentials: $(credentials)
-            regionName: $(region)
-            failOnStandardError: true
-            scriptType: 'inline'
-            inlineScript: |
+      displayName: 'Pull and deploy Helm Chart'
+      inputs:
+        awsCredentials: $(credentials)
+        regionName: $(region)
+        failOnStandardError: true
+        scriptType: 'inline'
+        inlineScript: |
 
-
-                # Get Kubeconfig
-                echo 'Connect to Amazon EKS cluster'
-                aws eks update-kubeconfig --region $(REGION) --name $(PROJECT)-eks-cluster-$(ENVIRONMENT)
+        
+          # Get Kubeconfig
+          echo 'Connect to Amazon EKS cluster'
+          aws eks update-kubeconfig --region $(REGION) --name $(PROJECT)-eks-cluster-$(ENVIRONMENT)
                 
-                # Deploy Helm Chart
-                echo 'Deploy Helm chart to EKS...'
-                helm install prueba-eks-alb-controller-dev https://aws.github.io/eks-charts/aws-load-balancer-controller \
-                --namespace default \
-                --version 1.4.1 \
-                --set clusterName=$(PROJECT)-eks-cluster-$(ENVIRONMENT) \
-                --set image.tag=v2.4.2 \
-                --set serviceAccount.name=$(PROJECT)-alb-controller-sa-$(ENVIRONMENT) \
-                --set serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn=arn:aws:iam::438555236323:role/$(PROJECT)-alb-controller-rol-$(ENVIRONMENT)
+          # Deploy Helm Chart
+          echo 'Deploy Helm chart to EKS...'
+          helm install prueba-eks-alb-controller-dev https://aws.github.io/eks-charts/aws-load-balancer-controller \
+          --namespace default \
+          --version 1.4.1 \
+          --set clusterName=$(PROJECT)-eks-cluster-$(ENVIRONMENT) \
+          --set image.tag=v2.4.2 \
+          --set serviceAccount.name=$(PROJECT)-alb-controller-sa-$(ENVIRONMENT) \
+          --set serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn=arn:aws:iam::438555236323:role/$(PROJECT)-alb-controller-rol-$(ENVIRONMENT)
 
 
 
