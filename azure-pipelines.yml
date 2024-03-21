@@ -18,7 +18,13 @@ steps:
     stackName: 'dev'
     templateSource: 'file'
     templateFile: '$(Build.Repository.LocalPath)/main.yml'
-    templateParameters: '-Project $(Project) -Environment $(Environment) -MasterUserPassword $(MasterUserPassword)
-      -VPCBlock $(VPCBlock) -VPCBlockSub1 $(VPCBlockSub1) -VPCBlockSub2 $(VPCBlockSub2) -VPCBlockSub3 $(VPCBlockSub3)
-      -VPCBlockSub4 $(VPCBlockSub4)'
+    parameters: 
+      Project: $(Project) 
+      Environment: $(Environment) 
+      MasterUserPassword: $(MasterUserPassword)
+      VPCBlock: $(VPCBlock) 
+      VPCBlockSub1: $(VPCBlockSub1) 
+      VPCBlockSub2: $(VPCBlockSub2) 
+      VPCBlockSub3: $(VPCBlockSub3)
+      VPCBlockSub4: $(VPCBlockSub4)'
       
