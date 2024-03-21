@@ -7,6 +7,8 @@ pool:
 variables:
   credentials: 'aws-azure'
   region: 'us-east-1'
+  helm-alb-uri: 'https://aws.github.io/eks-charts'
+  helm-alb-version: '1.4.1'
 
 steps:
   - checkout: self  
@@ -54,22 +56,34 @@ steps:
           }
         ]
 
-  - task: TerraformInstaller@1
-    inputs:
-      terraformVersion: '1.3.5'
+  - task: HelmInstaller@1
+        displayName: 'Install Helm'
+        inputs:
+          helmVersionToInstall: ${{ parameters.helmVersion }}
 
-  - task: TerraformTaskV4@4
-    inputs:
-      provider: 'aws'
-      command: 'init'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-      backendServiceAWS: 'aws-terraform'
-      backendAWSBucketName: 'agricola-tf-state'
-      backendAWSKey: 'tf/state/terraform.tfstate'
-  - task: TerraformTaskV4@4
-    inputs:
-      provider: 'aws'
-      command: 'apply'
-      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-      environmentServiceNameAWS: 'aws-terraform'
+  - task: AWSShellScript@1
+        displayName: 'Pull and deploy Helm Chart'
+        inputs:
+            awsCredentials: $(credentials)
+            regionName: $(region)
+            failOnStandardError: true
+            scriptType: 'inline'
+            inlineScript: |
+
+
+                # Get Kubeconfig
+                echo 'Connect to Amazon EKS cluster'
+                aws eks update-kubeconfig --region $(REGION) --name $(PROJECT)-eks-cluster-$(ENVIRONMENT)
+                
+                # Deploy Helm Chart
+                echo 'Deploy Helm chart to EKS...'
+                helm install prueba-eks-alb-controller-dev https://aws.github.io/eks-charts/aws-load-balancer-controller \
+                --namespace default \
+                --version 1.4.1 \
+                --set clusterName=$(PROJECT)-eks-cluster-$(ENVIRONMENT) \
+                --set image.tag=v2.4.2 \
+                --set serviceAccount.name=$(PROJECT)-alb-controller-sa-$(ENVIRONMENT) \
+                --set serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn=arn:aws:iam::438555236323:role/$(PROJECT)-alb-controller-rol-$(ENVIRONMENT)
+
+
 
