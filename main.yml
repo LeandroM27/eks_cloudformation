@@ -392,7 +392,7 @@ Resources:
       GroupName: !Sub '${Project}-rds-sg-${Environment}'
       VpcId: !Ref EC2VPC
       SecurityGroupIngress:
-        - SourceSecurityGroupId: !Ref EC2SecurityGroup2
+        - SourceSecurityGroupId: !GetAtt EC2SecurityGroup2.GroupId
           SourceSecurityGroupOwnerId: !Ref AWS::AccountId
           FromPort: 5432
           IpProtocol: 'tcp'
