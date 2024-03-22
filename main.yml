@@ -308,6 +308,9 @@ Resources:
       DiskSize: 20
       Tags: {}
       CapacityType: 'ON_DEMAND'
+      RemoteAccess:
+        SourceSecurityGroups:
+          - !Ref EC2SecurityGroup2
 
     
 
@@ -400,12 +403,12 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: 'EKS created security group applied to ENI that is attached to EKS Control Plane master nodes, as well as any managed workloads.'
-      GroupName: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}-786871630'
+      GroupName: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
       Tags:
         - Key: !Sub 'kubernetes.io/cluster/${Project}-eks-cluster-${Environment}'
           Value: 'owned'
         - Key: 'Name'
-          Value: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}-786871630'
+          Value: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
       VpcId: !Ref EC2VPC
       SecurityGroupIngress:
         - CidrIp: '0.0.0.0/0'
