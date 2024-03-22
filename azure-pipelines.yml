@@ -74,10 +74,12 @@ steps:
         pwd
         cd terraform
         terraform init
+        echo 'defining non sensitive values as envs'
         export TF_VAR_environment=$(ENVIRONMENT)
         export TF_VAR_project_name=$(PROJECT)
         export TF_VAR_cloudflare_email=$(CLOUDFLAREEMAIL)
-        terraform apply -auto-approve -lock=false -var="cloudflare_api_key=$(CLOUDFLAREKEY)"
+        echo 'passing sensitiva values as inline variables'
+        terraform apply -auto-approve -lock=false -var="cloudflare_api_key=$(CLOUDFLAREKEY)" -var="sonar_user=$(DBUSER)" -var="sonar_pass=$(DBPASS)"
 
 
 

@@ -1,10 +1,10 @@
 data "aws_iam_role" "aws_load_balancer_controller" {
-  name = "prueba-eks-alb-controller-rol-dev"
+  name = "${var.project_name}-alb-controller-rol-${var.environment}"
 }
 
 
 resource "helm_release" "aws-load-balancer-controller" {
-  name = "prueba-eks-alb-controller-dev"
+  name = "${var.project_name}-alb-controller-${var.environment}"
 
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
