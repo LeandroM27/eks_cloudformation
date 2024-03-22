@@ -20,7 +20,7 @@ metadata:
     alb.ingress.kubernetes.io/healthy-threshold-count: '2'
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
     # External DNS - For creating a Record Set in cloudfront
-    external-dns.alpha.kubernetes.io/hostname: java.mycloudprojects.uk
+    external-dns.alpha.kubernetes.io/hostname: java.mycloudprojects.uk, sonar.mycloudprojects.uk
 spec:
   ingressClassName: my-aws-ingress-class # Ingress Class
   rules:
@@ -34,4 +34,14 @@ spec:
             name: java-backend
             port:
               number: 80
+  - host: sonar.mycloudprojects.uk
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prueba-eks-sonarqube-dev-sonarqube
+            port:
+              number: 9000
       

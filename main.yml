@@ -286,7 +286,23 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly'
         - 'arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy'
 
-  
+  EC2SecurityGroup2:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'EKS created security group applied to ENI that is attached to EKS Control Plane master nodes, as well as any managed workloads.'
+      GroupName: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
+      Tags:
+        - Key: !Sub 'kubernetes.io/cluster/${Project}-eks-cluster-${Environment}'
+          Value: 'owned'
+        - Key: 'Name'
+          Value: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
+      VpcId: !Ref EC2VPC
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
 
   EKSNodegroup:
     Type: 'AWS::EKS::Nodegroup'
@@ -319,8 +335,6 @@ Resources:
 
   # ----------------------------------------- node autoscaler -------------------------------
 
-  
-  
   IAMManagedPolicy2:
     Type: 'AWS::IAM::ManagedPolicy'
     Properties:
@@ -330,60 +344,13 @@ Resources:
 
   # ----------------------------------------- alb controller -------------------------------
 
-  IAMManagedPolicy:
-    Type: 'AWS::IAM::ManagedPolicy'
-    Properties:
-      ManagedPolicyName: !Sub '${Project}-inline-pol-tags-${Environment}'
-      Path: '/'
-      PolicyDocument: '{"Statement":[{"Action":"elasticloadbalancing:AddTags","Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+  # moved this rol to terraform since is use for kubernetes resources
 
-  IAMManagedPolicy3:
-    Type: 'AWS::IAM::ManagedPolicy'
-    Properties:
-      ManagedPolicyName: !Sub '${Project}-alb-controller-pol-${Environment}'
-      Path: '/'
-      PolicyDocument: '{"Statement":[{"Action":["iam:CreateServiceLinkedRole"],"Condition":{"StringEquals":{"iam:AWSServiceName":"elasticloadbalancing.amazonaws.com"}},"Effect":"Allow","Resource":"*"},{"Action":["ec2:DescribeAccountAttributes","ec2:DescribeAddresses","ec2:DescribeAvailabilityZones","ec2:DescribeInternetGateways","ec2:DescribeVpcs","ec2:DescribeVpcPeeringConnections","ec2:DescribeSubnets","ec2:DescribeSecurityGroups","ec2:DescribeInstances","ec2:DescribeNetworkInterfaces","ec2:DescribeTags","ec2:GetCoipPoolUsage","ec2:DescribeCoipPools","elasticloadbalancing:DescribeLoadBalancers","elasticloadbalancing:DescribeLoadBalancerAttributes","elasticloadbalancing:DescribeListeners","elasticloadbalancing:DescribeListenerCertificates","elasticloadbalancing:DescribeSSLPolicies","elasticloadbalancing:DescribeRules","elasticloadbalancing:DescribeTargetGroups","elasticloadbalancing:DescribeTargetGroupAttributes","elasticloadbalancing:DescribeTargetHealth","elasticloadbalancing:DescribeTags"],"Effect":"Allow","Resource":"*"},{"Action":["cognito-idp:DescribeUserPoolClient","acm:ListCertificates","acm:DescribeCertificate","iam:ListServerCertificates","iam:GetServerCertificate","waf-regional:GetWebACL","waf-regional:GetWebACLForResource","waf-regional:AssociateWebACL","waf-regional:DisassociateWebACL","wafv2:GetWebACL","wafv2:GetWebACLForResource","wafv2:AssociateWebACL","wafv2:DisassociateWebACL","shield:GetSubscriptionState","shield:DescribeProtection","shield:CreateProtection","shield:DeleteProtection"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:AuthorizeSecurityGroupIngress","ec2:RevokeSecurityGroupIngress"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:CreateSecurityGroup"],"Effect":"Allow","Resource":"*"},{"Action":["ec2:CreateTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"false"},"StringEquals":{"ec2:CreateAction":"CreateSecurityGroup"}},"Effect":"Allow","Resource":"arn:aws:ec2:*:*:security-group/*"},{"Action":["ec2:CreateTags","ec2:DeleteTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"true","aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"arn:aws:ec2:*:*:security-group/*"},{"Action":["ec2:AuthorizeSecurityGroupIngress","ec2:RevokeSecurityGroupIngress","ec2:DeleteSecurityGroup"],"Condition":{"Null":{"aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:CreateLoadBalancer","elasticloadbalancing:CreateTargetGroup"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:CreateListener","elasticloadbalancing:DeleteListener","elasticloadbalancing:CreateRule","elasticloadbalancing:DeleteRule"],"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:AddTags","elasticloadbalancing:RemoveTags"],"Condition":{"Null":{"aws:RequestTag/elbv2.k8s.aws/cluster":"true","aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":["arn:aws:elasticloadbalancing:*:*:targetgroup/*/*","arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*","arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"]},{"Action":["elasticloadbalancing:AddTags","elasticloadbalancing:RemoveTags"],"Effect":"Allow","Resource":["arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*","arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*","arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*","arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"]},{"Action":["elasticloadbalancing:ModifyLoadBalancerAttributes","elasticloadbalancing:SetIpAddressType","elasticloadbalancing:SetSecurityGroups","elasticloadbalancing:SetSubnets","elasticloadbalancing:DeleteLoadBalancer","elasticloadbalancing:ModifyTargetGroup","elasticloadbalancing:ModifyTargetGroupAttributes","elasticloadbalancing:DeleteTargetGroup"],"Condition":{"Null":{"aws:ResourceTag/elbv2.k8s.aws/cluster":"false"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticloadbalancing:RegisterTargets","elasticloadbalancing:DeregisterTargets"],"Effect":"Allow","Resource":"arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"},{"Action":["elasticloadbalancing:SetWebAcl","elasticloadbalancing:ModifyListener","elasticloadbalancing:AddListenerCertificates","elasticloadbalancing:RemoveListenerCertificates","elasticloadbalancing:ModifyRule"],"Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+  # ----------------------------------------- external dns ---------------------------------
 
-  IAMRole5:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      Path: '/'
-      RoleName:  !Sub '${Project}-alb-controller-rol-${Environment}'
-      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
-"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:default:${Project}-alb-controller-sa-${Environment}"}}}]}'
-      MaxSessionDuration: 3600
-      ManagedPolicyArns:
-        - !Ref IAMManagedPolicy3
-        - !Ref IAMManagedPolicy
+  # moved this rol to terraform since is use for kubernetes resources
 
-  # ----------------------------------------- external dns -------------------------------
-
-  IAMManagedPolicy4:
-    Type: 'AWS::IAM::ManagedPolicy'
-    Properties:
-      ManagedPolicyName: !Sub '${Project}-ext-dns-pol-${Environment}'
-      Path: '/'
-      PolicyDocument: '{"Statement":[{"Action":["route53:ChangeResourceRecordSets"],"Effect":"Allow","Resource":["arn:aws:route53:::hostedzone/*"]},{"Action":["route53:ListHostedZones","route53:ListResourceRecordSets"],"Effect":"Allow","Resource":["*"]}],"Version":"2012-10-17"}'
-
-  IAMRole6:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      Path: '/'
-      RoleName: !Sub '${Project}-external-dns-rol-${Environment}'
-      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
-"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:default:external-dns"}}}]}'
-      MaxSessionDuration: 3600
-      ManagedPolicyArns:
-        - !Ref IAMManagedPolicy4
-
-  # ----------------------------------------- efs csi driver -------------------------------
-
-  IAMManagedPolicy5:
-    Type: 'AWS::IAM::ManagedPolicy'
-    Properties:
-      ManagedPolicyName: !Sub '${Project}-eks-csi-pol-${Environment}'
-      Path: '/'
-      PolicyDocument: '{"Statement":[{"Action":["elasticfilesystem:DescribeAccessPoints","elasticfilesystem:DescribeFileSystems","elasticfilesystem:DescribeMountTargets","ec2:DescribeAvailabilityZones"],"Effect":"Allow","Resource":"*"},{"Action":["elasticfilesystem:CreateAccessPoint"],"Condition":{"StringLike":{"aws:RequestTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"},{"Action":["elasticfilesystem:TagResource"],"Condition":{"StringLike":{"aws:ResourceTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"},{"Action":"elasticfilesystem:DeleteAccessPoint","Condition":{"StringEquals":{"aws:ResourceTag/efs.csi.aws.com/cluster":"true"}},"Effect":"Allow","Resource":"*"}],"Version":"2012-10-17"}'
+  # ----------------------------------------- rds ------------------------------------------
 
   EC2SecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -399,53 +366,6 @@ Resources:
       SecurityGroupEgress:
         - CidrIp: '0.0.0.0/0'
           IpProtocol: '-1'
-
-  EC2SecurityGroup2:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: 'EKS created security group applied to ENI that is attached to EKS Control Plane master nodes, as well as any managed workloads.'
-      GroupName: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
-      Tags:
-        - Key: !Sub 'kubernetes.io/cluster/${Project}-eks-cluster-${Environment}'
-          Value: 'owned'
-        - Key: 'Name'
-          Value: !Sub 'eks-cluster-sg-${Project}-eks-cluster-${Environment}'
-      VpcId: !Ref EC2VPC
-      SecurityGroupIngress:
-        - CidrIp: '0.0.0.0/0'
-          IpProtocol: '-1'
-      SecurityGroupEgress:
-        - CidrIp: '0.0.0.0/0'
-          IpProtocol: '-1'
-
-  EC2SecurityGroup3:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: 'EFS Security Group'
-      GroupName: !Sub '${Project}-efs-sg-${Environment}'
-      VpcId: !Ref EC2VPC
-      SecurityGroupIngress:
-        - CidrIp: !GetAtt EC2VPC.CidrBlock
-          FromPort: 2049
-          IpProtocol: 'tcp'
-          ToPort: 2049
-
-  # created by alb controller
-
-  # EC2SecurityGroup4:
-  #   Type: 'AWS::EC2::SecurityGroup'
-  #   Properties:
-  #     GroupDescription: '[k8s] Shared Backend SecurityGroup for LoadBalancer'
-  #     GroupName: 'k8s-traffic-demo-2a97516c35'
-  #     Tags:
-  #       - Key: 'elbv2.k8s.aws/cluster'
-  #         Value: 'demo'
-  #       - Key: 'elbv2.k8s.aws/resource'
-  #         Value: 'backend-sg'
-  #     VpcId: 'vpc-035c1eb9a9888156e'
-  #     SecurityGroupEgress:
-  #       - CidrIp: '0.0.0.0/0'
-  #         IpProtocol: '-1'
 
   RDSDBSubnetGroup:
     Type: 'AWS::RDS::DBSubnetGroup'
@@ -489,16 +409,7 @@ Resources:
       OptionGroupName: 'default:postgres-14'
       CACertificateIdentifier: 'rds-ca-rsa2048-g1'
 
-  IAMRole4:
-    Type: 'AWS::IAM::Role'
-    Properties:
-      Path: '/'
-      RoleName: !Sub '${Project}-eks-csi-rol-${Environment}'
-      AssumeRolePolicyDocument: !Sub '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Federated":"arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/${EKSCluster}
-"},"Action":"sts:AssumeRoleWithWebIdentity","Condition":{"StringEquals":{"oidc.eks.us-east-1.amazonaws.com/id/829ACDF64F5E90FACC3E0E3846E89E8B:sub":"system:serviceaccount:kube-system:${Project}-eks-csi-sa-${Environment}"}}}]}'
-      MaxSessionDuration: 3600
-      ManagedPolicyArns:
-        - !Ref IAMManagedPolicy5
+
 
   
 
