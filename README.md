@@ -3,6 +3,10 @@
 This is a terraform project in charge of creating the IaC for an EKS cluster in aws using a cloudformation template
 that is run by azure pipelines
 
+## App
+
+The app to be deployed in this cluster can be found here https://github.com/LeandroM27/MicroServicio_Evaluacion
+
 ## AWS services and resources use:
 
 - VPC
