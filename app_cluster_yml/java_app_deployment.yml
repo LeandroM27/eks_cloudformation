@@ -16,6 +16,6 @@ spec:
     spec:      
       containers:
         - name: java-backend
-          image: 438555236323.dkr.ecr.us-east-1.amazonaws.com/prueba_tecnica  
+          image: 438555236323.dkr.ecr.us-east-1.amazonaws.com/microservicio_evaluacion  
           ports: 
             - containerPort: 8080
