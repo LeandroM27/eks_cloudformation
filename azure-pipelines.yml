@@ -31,6 +31,10 @@ steps:
             "ParameterValue":"$(Environment)"
           },
           {
+            "ParameterKey":"MasterUser",
+            "ParameterValue":"$(MasterUser)"
+          },
+          {
             "ParameterKey":"MasterUserPassword",
             "ParameterValue":"$(MasterUserPassword)"
           },
@@ -79,7 +83,7 @@ steps:
         export TF_VAR_project_name=$(PROJECT)
         export TF_VAR_cloudflare_email=$(CLOUDFLAREEMAIL)
         echo 'passing sensitiva values as inline variables'
-        terraform apply -auto-approve -lock=false -var="cloudflare_api_key=$(CLOUDFLAREKEY)" -var="sonar_user=$(DBUSER)" -var="sonar_pass=$(DBPASS)"
+        terraform apply -auto-approve -lock=false -var="cloudflare_api_key=$(CLOUDFLAREKEY)" -var="sonar_user=$(MASTERUSER)" -var="sonar_pass=$(MASTERUSERPASSWORD)"
 
 
 

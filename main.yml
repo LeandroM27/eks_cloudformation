@@ -15,6 +15,11 @@ Parameters:
     Type: String
     NoEcho: true
 
+  MasterUser:
+    Description: The master user for the DB instance.
+    Type: String
+    NoEcho: true
+
   VPCBlock:
     Description: The CIDR block for the VPC.
     Type: String
@@ -454,7 +459,7 @@ Resources:
       AllocatedStorage: 20
       DBInstanceClass: 'db.t3.micro'
       Engine: 'postgres'
-      MasterUsername: 'adminsonar'
+      MasterUsername: !Ref MasterUser
       MasterUserPassword: !Ref MasterUserPassword
       DBName: 'sonardb'
       PreferredBackupWindow: '21:00-23:00'
