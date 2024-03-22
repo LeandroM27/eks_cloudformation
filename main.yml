@@ -310,7 +310,7 @@ Resources:
       Tags: {}
       CapacityType: 'ON_DEMAND'
       RemoteAccess:
-        Ec2SshKey: 'agricola_${Environment}'
+        Ec2SshKey: !Sub 'agricola_${Environment}'
         SourceSecurityGroups:
           - !Ref EC2SecurityGroup2
 
