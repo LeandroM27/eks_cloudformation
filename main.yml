@@ -286,10 +286,7 @@ Resources:
         - 'arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly'
         - 'arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy'
 
-  MyKeyPair:
-  Type: 'AWS::EC2::KeyPair'
-  Properties:
-    KeyName: 'agricola_dev'
+  
 
   EKSNodegroup:
     Type: 'AWS::EKS::Nodegroup'
@@ -313,7 +310,7 @@ Resources:
       Tags: {}
       CapacityType: 'ON_DEMAND'
       RemoteAccess:
-        Ec2SshKey: !Ref MyKeyPair
+        Ec2SshKey: 'agricola_${Environment}'
         SourceSecurityGroups:
           - !Ref EC2SecurityGroup2
 
