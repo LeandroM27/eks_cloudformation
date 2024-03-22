@@ -1,6 +1,6 @@
 ## EKS cluster
 
-This is a terraform project in charge of creating the IaC for an EKS cluster in aws using a cloudformation template
+This is a cloudformation project in charge of creating the IaC for an EKS cluster in aws using a cloudformation template
 that is run by azure pipelines
 
 ## App
