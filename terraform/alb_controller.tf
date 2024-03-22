@@ -80,7 +80,7 @@ resource "helm_release" "aws-load-balancer-controller" {
 
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn" // passes anotation to sa
-    value = data.aws_iam_role.aws_load_balancer_controller.arn
+    value = aws_iam_role.aws_load_balancer_controller.arn
   }
 
 }
