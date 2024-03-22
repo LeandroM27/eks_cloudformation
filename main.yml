@@ -308,9 +308,6 @@ Resources:
       DiskSize: 20
       Tags: {}
       CapacityType: 'ON_DEMAND'
-      RemoteAccess:
-        SourceSecurityGroups:
-          - !Ref EC2SecurityGroup2
 
     
 
@@ -386,11 +383,11 @@ Resources:
   EC2SecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupDescription: 'Managed by Terraform'
+      GroupDescription: 'rds sg'
       GroupName: !Sub '${Project}-rds-sg-${Environment}'
       VpcId: !Ref EC2VPC
       SecurityGroupIngress:
-        - SourceSecurityGroupId: !Ref EC2SecurityGroup2
+        - SourceSecurityGroupId: !Ref EKSNodegroup
           SourceSecurityGroupOwnerId: !Ref AWS::AccountId
           FromPort: 5432
           IpProtocol: 'tcp'
