@@ -17,10 +17,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "agricola-tf-state"
-    key    = "tf/state/terraform.tfstate"
+    bucket = "agricola-tf-state-${var.environment}"
+    key    = "tf-${var.environment}/state/terraform.tfstate"
     region = "us-east-1"
-    dynamodb_table = "agricola-tf-state"
+    dynamodb_table = "agricola-tf-state-${var.environment}"
     encrypt = "true"
   }
 
