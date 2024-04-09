@@ -17,7 +17,7 @@ steps:
     inputs:
       awsCredentials: $(credentials)
       regionName: $(region)
-      stackName: $(Environment)
+      stackName: $(variables.Environment)
       templateSource: 'file'
       templateFile: '$(Build.Repository.LocalPath)/main.yml'
       templateParametersSource: 'inline'
@@ -29,7 +29,7 @@ steps:
           },
           {
             "ParameterKey":"Environment",
-            "ParameterValue":"$(Environment)"
+            "ParameterValue":"$(variables.Environment)"
           },
           {
             "ParameterKey":"MasterUser",
