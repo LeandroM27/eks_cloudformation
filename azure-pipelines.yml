@@ -16,7 +16,7 @@ steps:
     inputs:
       awsCredentials: $(credentials)
       regionName: $(region)
-      stackName: 'dev'
+      stackName: $(Environment)
       templateSource: 'file'
       templateFile: '$(Build.Repository.LocalPath)/main.yml'
       templateParametersSource: 'inline'
