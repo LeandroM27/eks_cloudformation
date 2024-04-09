@@ -28,7 +28,7 @@ terraform {
 }
 
 data "aws_eks_cluster" "eks-cluster" {
-  name = "prueba-eks-eks-cluster-${var.environment}"
+  name = "prueba-eks-eks-cluster-dev"
 }
 
 provider "helm" { 
