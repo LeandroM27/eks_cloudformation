@@ -78,7 +78,7 @@ steps:
         echo 'deploying helm charts'
         pwd
         cd terraform
-        terraform init
+        terraform init -backend-config="bucket=agricola-tf-state-$(ENVIRONMENT)" -backend-config="key=tf-$(ENVIRONMENT)/state/terraform.tfstate" -backend-config="region=us-east-1" -backend-config="dynamodb_table=agricola-tf-state-$(ENVIRONMENT)" -backend-config="encrypt=true"
         echo 'defining non sensitive values as envs'
         export TF_VAR_environment=$(ENVIRONMENT)
         export TF_VAR_project_name=$(PROJECT)
