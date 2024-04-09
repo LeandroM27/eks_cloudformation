@@ -9,6 +9,7 @@ variables:
   region: 'us-east-1'
   helm-alb-uri: 'https://aws.github.io/eks-charts'
   helm-alb-version: '1.4.1'
+  group: stg_vars
 
 steps:
   - checkout: self  
