@@ -5,11 +5,15 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  credentials: 'aws-azure'
-  region: 'us-east-1'
-  helm-alb-uri: 'https://aws.github.io/eks-charts'
-  helm-alb-version: '1.4.1'
-  group: stg_vars
+  - name: credentials
+    value: 'aws-azure'
+  - name: region
+    value: 'us-east-1'
+  - name: helm-alb-uri
+    value: 'https://aws.github.io/eks-charts'
+  - name: helm-alb-version
+    value: '1.4.1'
+  - group: stg_vars
 
 steps:
   - checkout: self  
